@@ -24,6 +24,9 @@ const puterCloudQwenModels = () => PUTER_CLOUD_QWEN_MODELS.map(([id, name]) => (
     name,
     provider: 'puter',
     context: 1000000,
+    max_tokens: 128000,
+    costs_currency: 'usd-cents',
+    costs: { tokens: 1000000, prompt: 0, completion: 0 },
     modalities: { input: ['text'], output: ['text'] },
 }));
 
