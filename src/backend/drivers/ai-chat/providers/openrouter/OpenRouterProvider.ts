@@ -73,7 +73,7 @@ export class OpenRouterProvider implements IChatProvider {
     }
 
     getDefaultModel() {
-        return 'openrouter:openai/gpt-6-luna';
+        return 'openrouter:deepseek/deepseek-v4-flash:free';
     }
     /**
      * Returns a list of available model names including their aliases
