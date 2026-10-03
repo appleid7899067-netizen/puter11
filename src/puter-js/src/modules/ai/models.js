@@ -13,27 +13,6 @@ import { fetchUrl } from '../../lib/networkUtils.js';
  * @param {string} [provider]
  * @returns {Promise<Record<string, unknown>[]>}
  */
-const selectFeaturedModels = (models) => {
-    const unique = [];
-    const seen = new Set();
-
-    for (const model of models ?? []) {
-        const id = model?.id ?? model?.puterId;
-        if (!id || seen.has(id)) continue;
-        seen.add(id);
-        unique.push(model);
-    }
-
-    // Use Puter's live catalog as the source of truth. Qwen models first.
-    unique.sort((a, b) => {
-        const aq = /qwen/i.test(`${a?.id ?? ''} ${a?.name ?? ''}`) ? 0 : 1;
-        const bq = /qwen/i.test(`${b?.id ?? ''} ${b?.name ?? ''}`) ? 0 : 1;
-        return aq - bq;
-    });
-
-    return unique.slice(0, 20);
-};
-
 export async function listModels (provider) {
     const { puter } = this;
 
@@ -41,14 +20,12 @@ export async function listModels (provider) {
         (provider ? models.filter(model => model.provider === provider) : models);
 
     const tryFetchModels = async () => {
-        // `includePuterAuth` attaches the global instance's token.
         const resp = await fetchUrl(`${puter.APIOrigin }/puterai/chat/models/details`, {
             includePuterAuth: !! puter.authToken,
         });
         if ( ! resp.ok ) return null;
         const data = await resp.json();
-        const models = Array.isArray(data?.models) ? data.models : [];
-        return selectFeaturedModels(byProvider(models));
+        return byProvider(Array.isArray(data?.models) ? data.models : []);
     };
 
     const tryDriverModels = async () => {
@@ -56,7 +33,7 @@ export async function listModels (provider) {
             await puter.drivers.call('puter-chat-completion', 'ai-chat', 'models')
         );
         const driverModels = Array.isArray(models?.result) ? models.result : [];
-        return selectFeaturedModels(byProvider(driverModels));
+        return byProvider(driverModels);
     };
 
     try {
