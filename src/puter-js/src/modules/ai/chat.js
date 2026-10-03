@@ -129,6 +129,58 @@ const PARAMS_TO_PASS = [
  * @param {boolean | ChatOptions} [testModeOrOptions]
  * @returns {Promise<ChatResponse | AsyncIterable<ChatResponseChunk>>}
  */
+const PUTER_CLOUD_API_ORIGIN = 'https://api.puter.com';
+const PUTER_CLOUD_QWEN_PREFIX = 'qwen/';
+
+const isBrowserRuntime = () =>
+    typeof window !== 'undefined' && typeof document !== 'undefined';
+
+const isPuterCloudQwen = (model) =>
+    typeof model === 'string' && model.startsWith(PUTER_CLOUD_QWEN_PREFIX);
+
+async function runQwenThroughPuterCloud ({ puter, invoke }) {
+    if (!isBrowserRuntime() || puter.APIOrigin === PUTER_CLOUD_API_ORIGIN) {
+        return invoke();
+    }
+
+    const previousAPIOrigin = puter.APIOrigin;
+    const previousAuthToken = puter.authToken;
+    const previousAuthOrigin = localStorage.getItem('puter.auth.token.origin.v2');
+
+    puter.APIOrigin = PUTER_CLOUD_API_ORIGIN;
+    try {
+        // A self-hosted Puter session token is signed by the self-hosted
+        // instance and cannot authenticate against api.puter.com. Validate it
+        // first; if it is not a Puter Cloud token, use the normal browser
+        // sign-in flow. No API key is stored in the app or sent to our server.
+        let cloudAuthenticated = false;
+        if (puter.authToken) {
+            try {
+                await puter.auth.getUser();
+                cloudAuthenticated = true;
+            } catch {
+                puter.setAuthToken(null);
+            }
+        }
+
+        if (!cloudAuthenticated) {
+            await puter.auth.signIn();
+        }
+
+        return await invoke();
+    } finally {
+        // Restore the self-hosted session immediately so normal filesystem,
+        // auth, and GUI calls keep using this deployment after Qwen finishes.
+        puter.APIOrigin = previousAPIOrigin;
+        puter.setAuthToken(previousAuthToken);
+        if (previousAuthOrigin) {
+            localStorage.setItem('puter.auth.token.origin.v2', previousAuthOrigin);
+        } else {
+            localStorage.removeItem('puter.auth.token.origin.v2');
+        }
+    }
+}
+
 export async function chat (
     promptOrMessages,
     mediaOrOptions,
