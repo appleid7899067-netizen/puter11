@@ -95,6 +95,29 @@ export const loadConfig = (): IConfig => {
         config.jwt_secret_v2 = process.env.JWT_SECRET_V2;
     }
 
+    if (process.env.URL_SIGNATURE_SECRET) {
+        config.url_signature_secret = process.env.URL_SIGNATURE_SECRET;
+    }
+
+    // Render provides the public service URL automatically. Prefer it when the
+    // bundled config still points at a different service hostname.
+    if (process.env.RENDER_EXTERNAL_URL) {
+        try {
+            const externalUrl = new URL(process.env.RENDER_EXTERNAL_URL);
+            if (externalUrl.hostname) {
+                config.domain = externalUrl.hostname;
+                config.protocol = externalUrl.protocol.replace(':', '');
+                config.pub_port = externalUrl.port
+                    ? Number(externalUrl.port)
+                    : (config.protocol === 'https' ? 443 : 80);
+                config.origin = externalUrl.origin;
+                config.api_base_url = externalUrl.origin;
+            }
+        } catch {
+            // Keep the configured domain/origin when Render's URL is invalid.
+        }
+    }
+
     if (!config.version) {
         const pkgPath = path.join(PACKAGE_ROOT, 'package.json');
         if (existsSync(pkgPath)) {
