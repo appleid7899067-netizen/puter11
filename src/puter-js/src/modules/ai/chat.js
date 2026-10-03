@@ -253,6 +253,31 @@ export async function chat (
     /** @type {ChatOptions & { stream?: boolean }} */
     const userParams = extras.find(isPlainObject) ?? {};
 
+    // The self-hosted backend has no Qwen provider. For Qwen models, use the
+    // same Puter Cloud AI service documented for browser Puter.js apps, while
+    // preserving the local Puter session for every other API call.
+    if (
+        isPuterCloudQwen(userParams.model) &&
+        puter.APIOrigin !== PUTER_CLOUD_API_ORIGIN &&
+        !puter.__puterCloudQwenActive
+    ) {
+        puter.__puterCloudQwenActive = true;
+        try {
+            return await runQwenThroughPuterCloud({
+                puter,
+                invoke: () => chat.call(
+                    this,
+                    promptOrMessages,
+                    mediaOrOptions,
+                    optionsOrTestMode,
+                    testModeOrOptions,
+                ),
+            });
+        } finally {
+            delete puter.__puterCloudQwenActive;
+        }
+    }
+
     // Copy relevant parameters from userParams to requestParams.
     // Use `!== undefined` so legitimate zeros (temperature: 0, max_tokens: 0)
     // are forwarded — truthy checks silently drop them.
