@@ -17,7 +17,9 @@
     "static_hosting_domain_alt": "host.xboss123.onrender.com",
     "private_app_hosting_domain": "app.xboss123.onrender.com",
     "private_app_hosting_domain_alt": "dev.xboss123.onrender.com",
-    "captcha": { "enabled": false },
+    "captcha": {
+        "enabled": false
+    },
     "default_user_group": "78b1b1dd-c959-44d2-b02c-8735671f9997",
     "default_temp_group": "b7220104-7905-4985-b996-649fdcdb3c8f",
     "storage_capacity": 104857600,
@@ -44,5 +46,8 @@
             "dataDir": "volatile/runtime/fauxqs-data",
             "s3StorageDir": "volatile/runtime/fauxqs-s3-data"
         }
-    }
+    },
+    "pub_port": 443,
+    "origin": "https://xboss123.onrender.com",
+    "api_base_url": "https://xboss123.onrender.com"
 }
