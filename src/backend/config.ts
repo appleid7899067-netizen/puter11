@@ -89,6 +89,13 @@ export const loadConfig = (): IConfig => {
 
     const config = deepMerge(defaults, override) as IConfig;
 
+    // Render assigns the HTTP bind port through PORT. Keep the public port/origin
+    // separate below, but always bind the server to Render's injected port.
+    if (process.env.PORT) {
+        const port = Number(process.env.PORT);
+        if (Number.isFinite(port) && port > 0) config.port = port;
+    }
+
     // Production secret overrides. Keep secrets out of git/config files and
     // allow Render or another deployment platform to inject them securely.
     if (process.env.JWT_SECRET_V2) {
