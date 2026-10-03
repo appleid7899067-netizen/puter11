@@ -82,6 +82,30 @@ export class OllamaChatProvider implements IChatProvider {
             return [];
         }
 
+        // Show ten useful Qwen Ollama choices in the selector.
+        // Installed models are kept first; the catalog fills in missing choices.
+        const qwenCatalog = [
+            'qwen3-coder:30b',
+            'qwen3-coder:480b',
+            'qwen3:0.6b',
+            'qwen3:1.7b',
+            'qwen3:4b',
+            'qwen3:8b',
+            'qwen3:14b',
+            'qwen3:30b',
+            'qwen3:32b',
+            'qwen3:235b',
+        ];
+        const installed = new Set(
+            models.map((model) => model.name || model.model),
+        );
+        models = [
+            ...models,
+            ...qwenCatalog
+                .filter((name) => !installed.has(name))
+                .map((name) => ({ name, size: 8192 })),
+        ];
+
         const coerced_models: IChatModel[] = [];
         for (const model of models) {
             // Ollama API returns models with 'name' property, not 'model'
@@ -192,6 +216,6 @@ export class OllamaChatProvider implements IChatProvider {
      * @returns {string} The default model ID 'gpt-oss:20b'
      */
     getDefaultModel() {
-        return 'gpt-oss:20b';
+        return 'qwen3-coder:30b';
     }
 }
