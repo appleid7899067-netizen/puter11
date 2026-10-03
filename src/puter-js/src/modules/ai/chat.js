@@ -150,8 +150,10 @@ async function runQwenThroughPuterCloud ({ puter, invoke }) {
     const previousGlobalAPIOriginEnv = globalThis.PUTER_API_ORIGIN_ENV;
 
     puter.APIOrigin = PUTER_CLOUD_API_ORIGIN;
-    globalThis.PUTER_API_ORIGIN = PUTER_CLOUD_API_ORIGIN;
-    globalThis.PUTER_API_ORIGIN_ENV = PUTER_CLOUD_API_ORIGIN;
+    // Keep the runtime API origin on the Puter client itself. The global
+    // constant is generated as a literal by the bundled build and cannot be
+    // assigned to.
+    puter.APIOrigin = PUTER_CLOUD_API_ORIGIN;
     try {
         // A self-hosted Puter session token is signed by the self-hosted
         // instance and cannot authenticate against api.puter.com. Validate it
@@ -176,10 +178,6 @@ async function runQwenThroughPuterCloud ({ puter, invoke }) {
         // Restore the self-hosted session immediately so normal filesystem,
         // auth, and GUI calls keep using this deployment after Qwen finishes.
         puter.APIOrigin = previousAPIOrigin;
-        if (previousGlobalAPIOrigin === undefined) delete globalThis.PUTER_API_ORIGIN;
-        else globalThis.PUTER_API_ORIGIN = previousGlobalAPIOrigin;
-        if (previousGlobalAPIOriginEnv === undefined) delete globalThis.PUTER_API_ORIGIN_ENV;
-        else globalThis.PUTER_API_ORIGIN_ENV = previousGlobalAPIOriginEnv;
         puter.setAuthToken(previousAuthToken);
         if (previousAuthOrigin) {
             localStorage.setItem('puter.auth.token.origin.v2', previousAuthOrigin);
