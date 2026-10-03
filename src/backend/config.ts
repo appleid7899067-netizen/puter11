@@ -89,6 +89,12 @@ export const loadConfig = (): IConfig => {
 
     const config = deepMerge(defaults, override) as IConfig;
 
+    // Production secret overrides. Keep secrets out of git/config files and
+    // allow Render or another deployment platform to inject them securely.
+    if (process.env.JWT_SECRET_V2) {
+        config.jwt_secret_v2 = process.env.JWT_SECRET_V2;
+    }
+
     if (!config.version) {
         const pkgPath = path.join(PACKAGE_ROOT, 'package.json');
         if (existsSync(pkgPath)) {
