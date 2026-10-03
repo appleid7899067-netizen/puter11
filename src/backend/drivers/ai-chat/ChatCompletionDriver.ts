@@ -54,7 +54,6 @@ import { MiniMaxProvider } from './providers/minimax/MiniMaxProvider.js';
 import { MistralAIProvider } from './providers/mistral/MistralAiProvider.js';
 import { MoonshotProvider } from './providers/moonshot/MoonshotProvider.js';
 import { NeuralwattProvider } from './providers/neuralwatt/NeuralwattProvider.js';
-import { OllamaChatProvider } from './providers/ollama/OllamaProvider.js';
 import { processPuterPathUploads } from './providers/openai/fileUpload.js';
 import { OpenAiChatProvider } from './providers/openai/OpenAiChatCompletionsProvider.js';
 import { OpenAiResponsesChatProvider } from './providers/openai/OpenAiChatResponsesProvider.js';
@@ -1373,17 +1372,6 @@ export class ChatCompletionDriver extends PuterDriver {
                 {
                     apiKey: alibabaKey,
                     apiBaseUrl: alibaba?.apiBaseUrl as string | undefined,
-                },
-                metering,
-            );
-        }
-
-        // Ollama — auto-discover local instance unless `enabled: false`.
-        const ollama = providers['ollama'];
-        if (ollama?.enabled !== false) {
-            this.#providers['ollama'] = new OllamaChatProvider(
-                {
-                    apiBaseUrl: ollama?.apiBaseUrl,
                 },
                 metering,
             );
