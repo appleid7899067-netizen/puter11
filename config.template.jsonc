@@ -457,14 +457,6 @@
             "apiBaseUrl": "https://api.hoonify.ai/v1"
         },
         "together-ai": { "apiKey": "" },
-        // Local Ollama. `enabled: false` skips the auto-probe at startup
-        // (otherwise Puter logs ECONNREFUSED on every boot when no Ollama
-        // is running).
-        "ollama": {
-            "enabled": false,
-            "apiBaseUrl": "http://localhost:11434"
-        },
-
         // ─ Image generation ─
         "openai-image-generation": { "apiKey": "" },
         "gemini-image-generation": { "apiKey": "" },
