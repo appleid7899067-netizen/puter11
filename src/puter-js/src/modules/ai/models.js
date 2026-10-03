@@ -1,5 +1,32 @@
 import { fetchUrl } from '../../lib/networkUtils.js';
 
+const PUTER_CLOUD_QWEN_MODELS = [
+    ['qwen/qwen3.8-max-prime', 'Qwen3.8 Max Prime'],
+    ['qwen/qwen3.8-flash', 'Qwen3.8 Flash'],
+    ['qwen/qwen3.8-max', 'Qwen3.8 Max'],
+    ['qwen/qwen3.8-27b', 'Qwen3.8 27B'],
+    ['qwen/qwen3.7-plus', 'Qwen3.7 Plus'],
+    ['qwen/qwen3.7-max', 'Qwen3.7 Max'],
+    ['qwen/qwen3.6-max-preview', 'Qwen3.6 Max Preview'],
+    ['qwen/qwen3.6-plus', 'Qwen3.6 Plus'],
+    ['qwen/qwen3.6-flash', 'Qwen3.6 Flash'],
+    ['qwen/qwen3.6-27b', 'Qwen3.6 27B'],
+    ['qwen/qwen3.6-35b-a3b', 'Qwen3.6 35B A3B'],
+    ['qwen/qwen3.5-plus', 'Qwen3.5 Plus'],
+    ['qwen/qwen3.5-27b', 'Qwen3.5 27B'],
+    ['qwen/qwen3.5-35b-a3b', 'Qwen3.5 35B A3B'],
+    ['qwen/qwen3-coder-flash', 'Qwen3 Coder Flash'],
+];
+
+const puterCloudQwenModels = () => PUTER_CLOUD_QWEN_MODELS.map(([id, name]) => ({
+    id,
+    puterId: id,
+    name,
+    provider: 'puter',
+    context: 1000000,
+    modalities: { input: ['text'], output: ['text'] },
+}));
+
 /**
  * @overload
  * @param {string} [provider]
@@ -26,14 +53,16 @@ export async function listModels (provider) {
         });
         if ( ! resp.ok ) return null;
         const data = await resp.json();
-        return byProvider(Array.isArray(data?.models) ? data.models : []);
+        const models = Array.isArray(data?.models) ? data.models : [];
+        return byProvider([...puterCloudQwenModels(), ...models]);
     };
 
     const tryDriverModels = async () => {
         const models = /** @type {{ result?: unknown } | undefined} */ (
             await puter.drivers.call('puter-chat-completion', 'ai-chat', 'models')
         );
-        return byProvider(Array.isArray(models?.result) ? models.result : []);
+        const driverModels = Array.isArray(models?.result) ? models.result : [];
+        return byProvider([...puterCloudQwenModels(), ...driverModels]);
     };
 
     try {
