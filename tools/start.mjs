@@ -84,7 +84,9 @@ try {
             console.warn('--extensions only applies to --server (GUI-only) mode; ignoring.');
         }
         await run(...npmSpawnArgs(['run', 'setupExtensions']));
-        await run(...npmSpawnArgs(['run', 'build:ts']));
+        // Production deploys run the full build before npm start.
+        // Rebuilding TypeScript here doubles memory usage on small Render instances
+        // and can trigger V8 OOM (exit 134). Reuse the generated dist/ artifacts.
         await run(process.execPath, [
             '--enable-source-maps',
             '-r', './dist/src/backend/telemetry.js',
