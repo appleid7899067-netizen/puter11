@@ -389,7 +389,15 @@ async function UIWindowLogin (options) {
             },
         });
 
-        wireAuthLogoHeader(el_window);
+        // Logo wiring is cosmetic and must never prevent the login form handlers
+        // below from being attached. Normalize the UIWindow return value to a DOM
+        // node because the helper uses querySelectorAll().
+        try {
+            const loginRoot = el_window?.nodeType ? el_window : $(el_window)[0];
+            if ( loginRoot ) wireAuthLogoHeader(loginRoot);
+        } catch (error) {
+            console.warn('[login] auth logo wiring failed; continuing with login form', error);
+        }
 
         if ( logo_clickable ) {
             $(el_window).find('.auth-logo').on('click', function () {
